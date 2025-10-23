@@ -1,6 +1,7 @@
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
 import { Plus } from 'lucide-react-native';
 
+
 interface CategoryButtonProps {
   title: string;
   onPress: () => void;
