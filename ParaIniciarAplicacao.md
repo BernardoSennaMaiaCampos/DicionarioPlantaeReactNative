@@ -24,4 +24,8 @@ npx react-native start
 # Terminal 2
 npx react-native run-android
 
+# Atualizando o Lucide
 
+npm uninstall lucide-react-native
+
+npm install lucide-react-native@latest --legacy-peer-deps
