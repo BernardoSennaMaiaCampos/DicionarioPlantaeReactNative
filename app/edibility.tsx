@@ -25,11 +25,11 @@ export default function EdibilityScreen() {
         <View style={styles.categoriesContainer}>
           <CategoryButton
             title="Comestíveis"
-            onPress={() => router.push({ pathname: '/plant-details', params: { category: category as string, type: type as string, edibility: 'comestiveis' } })}
+            onPress={() => router.push({ pathname: '/plant-list', params: { category: category as string, type: type as string, edibility: 'comestiveis' } })}
           />
           <CategoryButton
             title="Não Comestíveis"
-            onPress={() => router.push({ pathname: '/plant-details', params: { category: category as string, type: type as string, edibility: 'nao-comestiveis' } })}
+            onPress={() => router.push({ pathname: '/plant-list', params: { category: category as string, type: type as string, edibility: 'nao-comestiveis' } })}
           />
         </View>
 

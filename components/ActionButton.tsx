@@ -1,19 +1,19 @@
 import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { ArrowLeft, X } from 'lucide-react-native';
+import { ArrowLeft, X, RefreshCw } from 'lucide-react-native';
 import { Colors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
 
 interface ActionButtonProps {
   label: string;
   onPress: () => void;
-  variant?: 'back' | 'exit';
+  variant?: 'back' | 'exit' | 'retry';
 }
 
 export default function ActionButton({ label, onPress, variant = 'back' }: ActionButtonProps) {
-  const Icon = variant === 'back' ? ArrowLeft : X;
+  const Icon = variant === 'back' ? ArrowLeft : variant === 'exit' ? X : RefreshCw;
 
   return (
-    <TouchableOpacity 
-      style={styles.button} 
+    <TouchableOpacity
+      style={styles.button}
       onPress={onPress}
       activeOpacity={0.8}
     >
