@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, SafeAreaView, ScrollView, Image, ActivityIndicator } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import React, { useState, useCallback } from 'react';
+import { View, StyleSheet, SafeAreaView, ScrollView, Image, ActivityIndicator, Alert } from 'react-native';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
 import ActionButton from '@/components/ActionButton';
@@ -13,11 +13,13 @@ export default function PlantDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (id) {
-      loadPlantDetails(id);
-    }
-  }, [id]);
+  useFocusEffect(
+    useCallback(() => {
+      if (id) {
+        loadPlantDetails(id);
+      }
+    }, [id])
+  );
 
   const loadPlantDetails = async (plantId: string) => {
     try {
@@ -31,6 +33,35 @@ export default function PlantDetailScreen() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleDelete = async () => {
+    Alert.alert(
+      'Excluir Planta',
+      'Tem certeza que deseja excluir esta planta?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              if (plant) {
+                await api.deletePlant(plant.id);
+                Alert.alert('Sucesso', 'Planta excluída com sucesso!', [
+                  { text: 'OK', onPress: () => router.back() }
+                ]);
+              }
+            } catch (error) {
+              console.error(error);
+              Alert.alert('Erro', 'Falha ao excluir planta.');
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
   if (loading) {
@@ -83,18 +114,28 @@ export default function PlantDetailScreen() {
               {plant.comestivel ? 'Essível' : 'Não Essível'}
             </ThemedText>
           )}
+          {plant.origem && (
+            <ThemedText style={styles.origemTag}>
+              Origem: {plant.origem}
+            </ThemedText>
+          )}
         </View>
 
         <View style={styles.actionsContainer}>
           <ActionButton
+            label="Editar"
+            variant="primary"
+            onPress={() => router.push({ pathname: '/plant-edit', params: { id: plant.id } })}
+          />
+          <ActionButton
+            label="Excluir"
+            variant="exit"
+            onPress={handleDelete}
+          />
+          <ActionButton
             label="Voltar"
             variant="back"
             onPress={() => router.back()}
-          />
-          <ActionButton
-            label="Sair"
-            variant="exit"
-            onPress={() => router.push('/')}
           />
         </View>
       </ScrollView>
@@ -182,5 +223,10 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     color: Colors.light.primary,
     fontWeight: 'bold',
+  },
+  origemTag: {
+    marginTop: Spacing.xs,
+    color: Colors.light.textSecondary,
+    fontStyle: 'italic',
   },
 });

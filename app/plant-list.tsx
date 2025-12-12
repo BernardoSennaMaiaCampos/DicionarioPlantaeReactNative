@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, SafeAreaView, FlatList, ActivityIndicator, Image, TouchableOpacity, Text } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, useFocusEffect } from 'expo-router';
 import { ThemedText } from '@/components/themed-text';
 import { Colors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
 import ActionButton from '@/components/ActionButton';
 import { api, Plant } from '@/services/api';
+import { Plus, Search } from 'lucide-react-native';
+import { TextInput } from 'react-native-gesture-handler';
 
 export default function PlantListScreen() {
     const router = useRouter();
@@ -12,20 +14,23 @@ export default function PlantListScreen() {
     const [plants, setPlants] = useState<Plant[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [searchQuery, setSearchQuery] = useState('');
 
-    useEffect(() => {
-        loadPlants();
-    }, [category, type, edibility]);
-
-    const loadPlants = async () => {
+    const loadPlants = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
-            const data = await api.getPlants(category, type, edibility);
+
+            let data;
+            if (searchQuery.trim().length > 0) {
+                data = await api.searchPlants(searchQuery);
+            } else {
+                data = await api.getPlants(category, type, edibility);
+            }
+
             if (Array.isArray(data)) {
                 setPlants(data);
             } else {
-                // Add handling if data isn't an array as expected
                 console.warn('API returned non-array data:', data);
                 setPlants([]);
             }
@@ -35,7 +40,13 @@ export default function PlantListScreen() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [category, type, edibility, searchQuery]);
+
+    useFocusEffect(
+        useCallback(() => {
+            loadPlants();
+        }, [loadPlants])
+    );
 
     const renderPlantItem = ({ item }: { item: Plant }) => (
         <TouchableOpacity
@@ -60,10 +71,32 @@ export default function PlantListScreen() {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
+                <View style={styles.headerTop}>
+                    <TouchableOpacity
+                        style={styles.addButton}
+                        onPress={() => router.push('/plant-create')}
+                    >
+                        <Plus color={Colors.light.primary} size={24} />
+                    </TouchableOpacity>
+                </View>
                 <ThemedText type="title" style={styles.title}>Lista de Plantas</ThemedText>
                 <ThemedText type="subtitle" style={styles.subtitle}>
                     {category} - {type}
                 </ThemedText>
+
+                <View style={styles.searchContainer}>
+                    <TextInput
+                        style={styles.searchInput}
+                        placeholder="Buscar por nome..."
+                        placeholderTextColor={Colors.light.textSecondary}
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        onSubmitEditing={loadPlants}
+                    />
+                    <TouchableOpacity onPress={() => loadPlants()} style={styles.searchButton}>
+                        <Search size={20} color={Colors.light.text} />
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {loading ? (
@@ -110,6 +143,17 @@ const styles = StyleSheet.create({
         ...Shadows.sm,
         zIndex: 1,
     },
+    headerTop: {
+        width: '100%',
+        alignItems: 'flex-end',
+        marginBottom: -20, // Overlap slightly or adjust layout
+        zIndex: 10,
+    },
+    addButton: {
+        padding: Spacing.sm,
+        backgroundColor: Colors.light.surfaceSecondary,
+        borderRadius: BorderRadius.full,
+    },
     title: {
         textAlign: 'center',
         marginBottom: Spacing.xs,
@@ -118,6 +162,29 @@ const styles = StyleSheet.create({
         textAlign: 'center',
         color: Colors.light.textSecondary,
         textTransform: 'capitalize',
+    },
+    searchContainer: {
+        flexDirection: 'row',
+        marginTop: Spacing.md,
+        gap: Spacing.sm,
+        width: '100%',
+        maxWidth: 500,
+    },
+    searchInput: {
+        flex: 1,
+        backgroundColor: Colors.light.background,
+        borderRadius: BorderRadius.md,
+        padding: Spacing.md,
+        color: Colors.light.text,
+        borderWidth: 1,
+        borderColor: '#E0E0E0',
+    },
+    searchButton: {
+        padding: Spacing.md,
+        backgroundColor: Colors.light.surfaceSecondary,
+        borderRadius: BorderRadius.md,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     listContent: {
         padding: Spacing.md,

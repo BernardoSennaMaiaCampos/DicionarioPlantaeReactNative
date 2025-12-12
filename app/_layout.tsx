@@ -13,7 +13,10 @@ export default function RootLayout() {
         <Stack.Screen name="categories" options={{ headerShown: false }} />
         <Stack.Screen name="plant-types" options={{ headerShown: false }} />
         <Stack.Screen name="edibility" options={{ headerShown: false }} />
-        <Stack.Screen name="plant-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="plant-details" options={{ headerShown: false }} />
+        <Stack.Screen name="plant-create" options={{ headerShown: false }} />
+        <Stack.Screen name="plant-edit" options={{ headerShown: false }} />
+        <Stack.Screen name="plant-list" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

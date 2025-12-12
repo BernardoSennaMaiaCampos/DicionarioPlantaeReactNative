@@ -1,21 +1,31 @@
-import { TouchableOpacity, Text, StyleSheet, View } from 'react-native';
-import { ArrowLeft, X, RefreshCw } from 'lucide-react-native';
+import { TouchableOpacity, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { ArrowLeft, X, RefreshCw, Check } from 'lucide-react-native';
 import { Colors, BorderRadius, Shadows, Spacing } from '@/constants/theme';
 
 interface ActionButtonProps {
   label: string;
   onPress: () => void;
-  variant?: 'back' | 'exit' | 'retry';
+  variant?: 'back' | 'exit' | 'retry' | 'primary';
+  disabled?: boolean;
 }
 
-export default function ActionButton({ label, onPress, variant = 'back' }: ActionButtonProps) {
-  const Icon = variant === 'back' ? ArrowLeft : variant === 'exit' ? X : RefreshCw;
+export default function ActionButton({ label, onPress, variant = 'back', disabled = false }: ActionButtonProps) {
+  const Icon = variant === 'back' ? ArrowLeft :
+    variant === 'exit' ? X :
+      variant === 'retry' ? RefreshCw : Check;
+
+  const backgroundColor = variant === 'exit' ? Colors.light.error || '#D32F2F' : Colors.light.primary;
 
   return (
     <TouchableOpacity
-      style={styles.button}
+      style={[
+        styles.button,
+        { backgroundColor },
+        disabled && styles.disabledButton
+      ]}
       onPress={onPress}
       activeOpacity={0.8}
+      disabled={disabled}
     >
       <View style={styles.iconContainer}>
         <Icon size={18} color="#FFFFFF" strokeWidth={2} />
@@ -53,5 +63,8 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '600',
     letterSpacing: 0.2,
+  },
+  disabledButton: {
+    opacity: 0.6,
   },
 });
